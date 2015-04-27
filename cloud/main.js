@@ -6,6 +6,7 @@
 
 		var newEntity = request.object;
 		newEntity.set("state",0);
+		newEntity.set("average",0);
 		response.success();
 
 	});
@@ -17,6 +18,7 @@
 		//Sacar la propiedad new del request
 		var newEntity = request.object.get("new");
 
+		console.log(newEntity);
 		//Buscar todos los scores asociados a este new
 		var query = new Parse.Query("Score");
 		query.equalTo("new", newEntity);
@@ -30,9 +32,15 @@
 	      for (var i = 0; i < results.length; ++i) {
 	        sum += results[i].get("score");
 	      }
+
+	      //Creación del promedio
 	      var average =  (sum / results.length);
+
+	      //Asignación del nuevo valor
 	      newEntity.set("average",average);
 
+	      //Guardar valor nuevo
+	      newEntity.save();
 		 },function(error){
 
 		 });
