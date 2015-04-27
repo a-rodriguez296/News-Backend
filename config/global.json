@@ -1,0 +1,14 @@
+{
+  "global": {
+    "parseVersion": "1.4.2"
+  },
+  "applications": {
+    "News App": {
+      "applicationId": "LkcDLQrgBOx3WrlsQdF7CbWoRxRheZNFhYEUDNbt",
+      "masterKey": "FwmQCZvdYLvnn2DvxWy8vYRmi10x0wdmwvlAPgXW"
+    },
+    "_default": {
+      "link": "News App"
+    }
+  }
+}
