@@ -44,7 +44,9 @@
 	}); 
 
 
-    Parse.Cloud.define("hello", function(request, response) {
+
+    //Función para descargar data de facebook
+    Parse.Cloud.define("facebookInfo", function(request, response) {
 
         var fbAccessToken = Parse.User.current().get('authData')['facebook']['access_token'];
 
@@ -64,7 +66,31 @@
             console.error('Request failed with response code ' + httpResponse.status);
             response.success('Request failed with response code ' + httpResponse.status);
             }
-        });
+        });        
+    });
 
+
+    Parse.Cloud.afterSave(Parse.User, function(request) {
+
+        Parse.Cloud.useMasterKey();  
+
+        request.object.set("username", 'Alejandro ' + Date());
+        request.object.save();
         
+
+        //Buscar el role
+        query = new Parse.Query(Parse.Role);
+        query.equalTo("name", "Common User");
+        query.first ( {
+            success: function(object) {
+
+                //Cambio nombre de usuario
+                
+
+                object.relation("users").add(request.user);
+                object.save();
+            },
+            error: function(error) {
+            }
+        });
     });
