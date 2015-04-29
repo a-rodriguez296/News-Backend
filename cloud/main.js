@@ -1,7 +1,4 @@
 
-	// Use Parse.Cloud.define to define as many cloud functions as you want.
-	// For example:
-
 	Parse.Cloud.beforeSave("NewsEntity", function(request, response){
 
 		var newsEntity = request.object;
@@ -45,3 +42,29 @@
 
 		 });
 	}); 
+
+
+    Parse.Cloud.define("hello", function(request, response) {
+
+        var fbAccessToken = Parse.User.current().get('authData')['facebook']['access_token'];
+
+        Parse.Cloud.httpRequest({
+            url: 'https://graph.facebook.com/me?fields=id,name,birthday,hometown,email,picture,gender,friends&access_token='+ fbAccessToken,
+            // params :{
+            //     uri: 'url'
+            // },
+            headers: {
+                Accept: 'application/json'
+            },
+            success: function(httpResponse) {
+                console.log(httpResponse.text);
+                response.success(httpResponse.text.toJSON());
+            },
+            error: function(httpResponse) {
+            console.error('Request failed with response code ' + httpResponse.status);
+            response.success('Request failed with response code ' + httpResponse.status);
+            }
+        });
+
+        
+    });
