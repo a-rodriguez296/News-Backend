@@ -58,7 +58,7 @@
             },
             success: function(httpResponse) {
                 console.log(httpResponse.text);
-                response.success(httpResponse.text.toJSON());
+                response.success(JSON.parse(httpResponse.text));
             },
             error: function(httpResponse) {
             console.error('Request failed with response code ' + httpResponse.status);
