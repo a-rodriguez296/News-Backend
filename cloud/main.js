@@ -43,30 +43,27 @@
 		 });
 	}); 
 
+	function facebookRequest () {
 
+		var fbAccessToken = Parse.User.current().get('authData')['facebook']['access_token'];
+
+		var promiseFacebook = Parse.Cloud.httpRequest({
+		    url: 'https://graph.facebook.com/me?fields=id,name,birthday,hometown,email,picture,gender,friends&access_token='+ fbAccessToken,
+		    headers: {
+		        Accept: 'application/json'
+		    }
+		});
+
+		return promiseFacebook; 
+	}
 
     //Función para descargar data de facebook
     Parse.Cloud.define("facebookInfo", function(request, response) {
 
-        var fbAccessToken = Parse.User.current().get('authData')['facebook']['access_token'];
-
-        Parse.Cloud.httpRequest({
-            url: 'https://graph.facebook.com/me?fields=id,name,birthday,hometown,email,picture,gender,friends&access_token='+ fbAccessToken,
-            // params :{
-            //     uri: 'url'
-            // },
-            headers: {
-                Accept: 'application/json'
-            },
-            success: function(httpResponse) {
-                console.log(httpResponse.text);
-                response.success(JSON.parse(httpResponse.text));
-            },
-            error: function(httpResponse) {
-            console.error('Request failed with response code ' + httpResponse.status);
-            response.success('Request failed with response code ' + httpResponse.status);
-            }
-        });        
+        
+        facebookRequest().then(function (httpResponse) {
+        	response.success(JSON.parse(httpResponse.text));
+        });       
     });
 
 
@@ -74,23 +71,33 @@
 
         Parse.Cloud.useMasterKey();  
 
-        request.object.set("username", 'Alejandro ' + Date());
-        request.object.save();
         
 
         //Buscar el role
         query = new Parse.Query(Parse.Role);
         query.equalTo("name", "Common User");
-        query.first ( {
-            success: function(object) {
+        query.first({
+        	success: function () {
+        		
+		        facebookRequest().then(function (httpResponse) {
+		        	var facebookObj = JSON.parse(httpResponse.text);
+		        	console.log(facebookObj.name);
+		        	request.object.set("username", facebookObj.name);
+	        		//Cambio nombre de usuario
+			        request.object.relation("users").add(request.user);
+			        request.object.save();
+		        });
 
-                //Cambio nombre de usuario
-                
 
-                object.relation("users").add(request.user);
-                object.save();
-            },
-            error: function(error) {
-            }
+
+
+
+
+        	},
+        	error: function(error){
+        	}
         });
+
+
+        //Parse.Cloud.run('facebookInfo')
     });
