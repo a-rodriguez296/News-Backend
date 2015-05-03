@@ -2,10 +2,14 @@
 	Parse.Cloud.beforeSave("NewsEntity", function(request, response){
 
 		var newsEntity = request.object;
-		newsEntity.set("state",0);
-		newsEntity.set("average",0);
-		response.success();
 
+		//Validación para solo hacer estos cambios únicamente cuando se esta creando el objeto. 
+		if (newsEntity.isNew()) {
+
+			newsEntity.set("state",0);
+			newsEntity.set("average",0);
+			response.success();
+		}
 	});
 
 
@@ -70,9 +74,6 @@
     Parse.Cloud.afterSave(Parse.User, function(request) {
 
         Parse.Cloud.useMasterKey();  
-
-        
-
         //Buscar el role
         query = new Parse.Query(Parse.Role);
         query.equalTo("name", "Common User");
@@ -87,17 +88,34 @@
 			        request.object.relation("users").add(request.user);
 			        request.object.save();
 		        });
-
-
-
-
-
-
         	},
         	error: function(error){
         	}
         });
+    });
 
 
-        //Parse.Cloud.run('facebookInfo')
+    Parse.Cloud.job("updateNews", function(request, status){
+
+    	Parse.Cloud.useMasterKey();
+
+    	//Buscar todas las noticias que esteén en estado 1. Esto significa que ya han sido aprovadas por el curador
+    	var query = new Parse.Query("NewsEntity");
+		query.equalTo("state", 1);
+		query.find().then(function(results){
+
+			for (var i = 0; i < results.length; i++) {
+				
+				//Cambiar el estado de las variables a 2 
+				var newsEntity =  results[i];
+				newsEntity.set("state", 2);
+
+				//Grabar
+				newsEntity.save();
+			};
+
+			//
+			status.success("Migration completed successfully.");
+
+		});
     });
