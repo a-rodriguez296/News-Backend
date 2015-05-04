@@ -10,6 +10,9 @@
 			newsEntity.set("average",0);
 			response.success();
 		}
+		else{
+			response.success();
+		}
 	});
 
 
