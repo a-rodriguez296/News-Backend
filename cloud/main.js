@@ -17,12 +17,12 @@
 
 		
 		//Sacar la propiedad new del request
-		var newsEntity = request.object.get("new");
+		var newsEntity = request.object.get("newsEntity");
 
 		console.log(newsEntity);
 		//Buscar todos los scores asociados a este new
 		var query = new Parse.Query("Score");
-		query.equalTo("new", newsEntity);
+		query.equalTo("newsEntity", newsEntity);
 		query.find().then(function (results){
 
 
