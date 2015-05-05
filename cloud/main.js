@@ -42,6 +42,7 @@
 			
 			        }).then(function(result){
 
+			        	newsEntity.set("author",Parse.User.current().get('username'))
 			        	newsEntity.set("state",0);
 			        	newsEntity.set("average",0);
 			            response.success();
