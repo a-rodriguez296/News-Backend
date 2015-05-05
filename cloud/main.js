@@ -8,52 +8,23 @@
 
 		//Validación para solo hacer estos cambios únicamente cuando se esta creando el objeto. 
 		if (newsEntity.isNew()) {
-
-
-			
 			
 			if (!newsEntity.get("photo")) {
-			    //checkin.save();
 			    response.success();
 			} else {
 			
-			        Parse.Cloud.httpRequest({
-			            url: newsEntity.get("photo").url()
-			        }).then(function(response){
-			            var image = new Image();
-			            return image.setData(response.buffer);
-			        }).then(function (image){
-			
-			            return image.scale({ 
-			                width: 128,
-			                height: 128}
-			                )
-			        }).then(function(image){
-			            return image.setFormat("JPEG");
-			        }).then(function(image){
-			            return image.data();
-			        }).then(function(buffer){
-			            var base64 = buffer.toString("base64");
-			            var currentDate = new Date().getTime();
-			            var cropped = new Parse.File('thumbnail' + currentDate, {base64: base64});
-			            return cropped.save();
-			        }).then(function(cropped){
-			            newsEntity.set("photoThumbnail", cropped);
-			
-			        }).then(function(result){
-
-			        	newsEntity.set("author",Parse.User.current().get('username'))
-			        	newsEntity.set("state",0);
-			        	newsEntity.set("average",0);
-			            response.success();
-			        }, function(error){
-			            response.error(error);
-			        });
+					var photo = newsEntity.get("photo");
+					thumbnailFunction(photo).then(function(result){
+						newsEntity.set("photoThumbnail", result);
+						newsEntity.set("author",Parse.User.current().get('username'))
+						newsEntity.set("state",0);
+						newsEntity.set("average",0);
+					    response.success();
+					}, 
+					function(error){
+						response.error(error);
+					});
 			    }
-
-
-
-
 		}
 		else{
 			response.success();
@@ -94,6 +65,35 @@
 
 		 });
 	}); 
+
+
+	function thumbnailFunction (photoUrl) {
+		
+		var promise = Parse.Cloud.httpRequest({
+		    url: photoUrl.url()
+		}).then(function(response){
+		    var image = new Image();
+		    return image.setData(response.buffer);
+		}).then(function (image){
+		
+		    return image.scale({ 
+		        width: 128,
+		        height: 128}
+		        )
+		}).then(function(image){
+		    return image.setFormat("JPEG");
+		}).then(function(image){
+		    return image.data();
+		}).then(function(buffer){
+		    var base64 = buffer.toString("base64");
+		    var currentDate = new Date().getTime();
+		    var cropped = new Parse.File('thumbnail' + currentDate, {base64: base64});
+		    return cropped.save();
+		});
+
+		return promise;
+	}
+
 
 	function facebookRequest () {
 
